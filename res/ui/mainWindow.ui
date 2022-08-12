@@ -35,7 +35,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
           <item>
            <layout class="QVBoxLayout" name="verticalLayout" stretch="7,1">
             <item>
@@ -48,24 +48,24 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0">
               <item>
-               <widget class="QPushButton" name="playButton">
+               <widget class="QPushButton" name="playBtn">
                 <property name="text">
                  <string/>
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>res/play.png</normaloff>res/play.png</iconset>
+                  <normaloff>../icon/play.png</normaloff>../icon/play.png</iconset>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pauseButton">
+               <widget class="QPushButton" name="pauseBtn">
                 <property name="text">
                  <string/>
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>res/pause.png</normaloff>res/pause.png</iconset>
+                  <normaloff>../icon/pause.png</normaloff>../icon/pause.png</iconset>
                 </property>
                </widget>
               </item>
@@ -84,15 +84,19 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="fullscreenButton">
+               <widget class="QPushButton" name="fullscreenBtn">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>全屏</string>
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../icon/fullscreen.png</normaloff>../icon/fullscreen.png</iconset>
                 </property>
                </widget>
               </item>
@@ -101,22 +105,42 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
+           <layout class="QVBoxLayout" name="verticalLayout_5">
             <item>
-             <widget class="QTableView" name="tableView"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton">
-              <property name="text">
-               <string>PushButton</string>
+             <widget class="QGroupBox" name="groupBox">
+              <property name="title">
+               <string>功能区</string>
               </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_2">
-              <property name="text">
-               <string>PushButton</string>
-              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <item>
+                <widget class="QPushButton" name="pushButton_2">
+                 <property name="text">
+                  <string>PushButton</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_4">
+                 <property name="text">
+                  <string>PushButton</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_3">
+                 <property name="text">
+                  <string>PushButton</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton">
+                 <property name="text">
+                  <string>PushButton</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
            </layout>
@@ -127,7 +151,7 @@
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
-        <string>更多</string>
+        <string>...</string>
        </attribute>
       </widget>
      </widget>
@@ -147,16 +171,16 @@
     <property name="title">
      <string>文件</string>
     </property>
-    <addaction name="openAction"/>
-    <addaction name="actionbbb"/>
+    <addaction name="openAct"/>
+    <addaction name="saveAct"/>
     <addaction name="separator"/>
-    <addaction name="actionshe"/>
+    <addaction name="settingAct"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
      <string>帮助</string>
     </property>
-    <addaction name="actiondd"/>
+    <addaction name="aboutAct"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_3"/>
@@ -179,12 +203,12 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="openAction"/>
-   <addaction name="actionbbb"/>
+   <addaction name="openAct"/>
+   <addaction name="saveAct"/>
    <addaction name="separator"/>
-   <addaction name="actionshe"/>
+   <addaction name="settingAct"/>
   </widget>
-  <action name="openAction">
+  <action name="openAct">
    <property name="icon">
     <iconset>
      <normaloff>../icon/files.png</normaloff>../icon/files.png</iconset>
@@ -193,7 +217,7 @@
     <string>打开</string>
    </property>
   </action>
-  <action name="actionbbb">
+  <action name="saveAct">
    <property name="icon">
     <iconset>
      <normaloff>../icon/save.png</normaloff>../icon/save.png</iconset>
@@ -202,7 +226,7 @@
     <string>保存</string>
    </property>
   </action>
-  <action name="actionshe">
+  <action name="settingAct">
    <property name="icon">
     <iconset>
      <normaloff>../icon/setting.png</normaloff>../icon/setting.png</iconset>
@@ -211,7 +235,7 @@
     <string>设置</string>
    </property>
   </action>
-  <action name="actiondd">
+  <action name="aboutAct">
    <property name="text">
     <string>关于</string>
    </property>
