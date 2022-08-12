@@ -46,7 +46,7 @@
              </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0">
+             <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
               <item>
                <widget class="QPushButton" name="playBtn">
                 <property name="text">
@@ -59,27 +59,16 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pauseBtn">
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>../icon/pause.png</normaloff>../icon/pause.png</iconset>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QSlider" name="horizontalSlider">
+               <widget class="QSlider" name="videoSlider">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label">
+               <widget class="QLabel" name="ratioLabel">
                 <property name="text">
-                 <string>进度</string>
+                 <string>0:00/0:00</string>
                 </property>
                </widget>
               </item>
