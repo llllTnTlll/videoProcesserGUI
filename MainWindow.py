@@ -12,11 +12,15 @@ class MainWindow(QWidget):
         # 加载ui文件
         self.ui = uic.loadUi("./res/ui/MainWindow.ui")
         self.player = QMediaPlayer()
+
+        # 连接信号与槽
         self.player.stateChanged.connect(self.on_state_changed)
         self.player.positionChanged.connect(self.on_pos_changed)
         self.player.durationChanged.connect(self.on_dur_changed)
+        self.ui.videoSlider.sliderReleased.connect(self.on_slider_released)
+        self.ui.videoSlider.sliderPressed.connect(self.on_slider_pressed)
+        self.ui.videoSlider.sliderMoved.connect(self.on_slider_moved)
 
-        # 连接信号与槽
         self.ui.playBtn.clicked.connect(self.play_or_pause)
         self.ui.fullscreenBtn.clicked.connect(self.full_screen)
 
@@ -26,6 +30,7 @@ class MainWindow(QWidget):
         self.ui.videoWidget.installEventFilter(self)
 
         self.__isPlaying = False
+        self.__isSliderPressed = False
         self.__duration = ''
         self.__position = ''
 
@@ -66,14 +71,33 @@ class MainWindow(QWidget):
         self.ui.ratioLabel.setText(self.__position+"/"+self.__duration)
 
     def on_pos_changed(self, position):
-        if self.ui.videoSlider.isSliderDown():
-            return
-        self.ui.videoSlider.setSliderPosition(position)
-        secs = position / 1000
-        mins = secs / 60
-        secs = secs % 60
-        self.__position = "%d:%d" % (mins, secs)
-        self.ui.ratioLabel.setText(self.__position + "/" + self.__duration)
+        if not self.__isSliderPressed:
+            if self.ui.videoSlider.isSliderDown():
+                return
+            self.ui.videoSlider.setSliderPosition(position)
+
+            secs = position / 1000
+            mins = secs / 60
+            secs = secs % 60
+            self.__position = "%d:%d" % (mins, secs)
+            self.ui.ratioLabel.setText(self.__position + "/" + self.__duration)
+
+    def on_slider_pressed(self):
+        self.__isSliderPressed = True
+
+    def on_slider_released(self):
+        self.__isSliderPressed = False
+
+    def on_slider_moved(self, position):
+        self.__isSliderPressed = True
+        if self.player.duration() > 0:
+            video_position = int(position / 100)
+            self.player.setPosition(position)
+            secs = position / 1000
+            mins = secs / 60
+            secs = secs % 60
+            self.__position = "%d:%d" % (mins, secs)
+            self.ui.ratioLabel.setText(self.__position + "/" + self.__duration)
 
     # 动作
     def open_act(self):
