@@ -37,20 +37,11 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+           <layout class="QVBoxLayout" name="verticalLayout" stretch="7,1">
             <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string/>
-              </property>
-              <property name="pixmap">
-               <pixmap>../icon/files.png</pixmap>
-              </property>
-              <property name="scaledContents">
-               <bool>false</bool>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
+             <widget class="QVideoWidget" name="videoWidget" native="true">
+              <property name="autoFillBackground">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -239,6 +230,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QVideoWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">PyQt5.QtMultimediaWidgets</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

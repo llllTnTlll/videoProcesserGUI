@@ -19,13 +19,15 @@ class MainWindow(QWidget):
         # 连接信号与槽
         self.ui.playBtn.clicked.connect(self.play_or_pause)
         self.ui.fullscreenBtn.clicked.connect(self.full_screen)
-
+        self.ui.videoSlider.sliderMoved.connect(self.slider_moved)
+        self.ui.videoSlider.sliderClicked.connect(self.slider_clicked)
         self.ui.openAct.triggered.connect(self.open_act)
 
         # 注册事件过滤器
         self.ui.videoWidget.installEventFilter(self)
 
         self.__isPlaying = False
+        self.__is_slider_pressed = False
         self.__duration = ''
         self.__position = ''
 
@@ -66,7 +68,7 @@ class MainWindow(QWidget):
         self.ui.ratioLabel.setText(self.__position+"/"+self.__duration)
 
     def on_pos_changed(self, position):
-        if self.ui.videoSlider.isSliderDown():
+        if self.__is_slider_pressed:
             return
         self.ui.videoSlider.setSliderPosition(position)
         secs = position / 1000
@@ -83,7 +85,7 @@ class MainWindow(QWidget):
         self.player.setMedia(QMediaContent(QFileDialog.getOpenFileUrl(caption=cap, filter=filt)[0]))
         self.player.play()
 
-    # 按键功能
+    # 功能
     def play_or_pause(self):
         if self.__isPlaying:
             self.player.pause()
@@ -93,6 +95,17 @@ class MainWindow(QWidget):
     def full_screen(self):
         if not self.ui.videoWidget.isFullScreen():
             self.ui.videoWidget.setFullScreen(True)
+
+    def slider_moved(self, position):
+        self.__is_slider_pressed = True
+        if self.player.duration() > 0:
+            video_position = int((position / 100) * self.player.duration())
+            self.player.setPosition(video_position)
+
+    def slider_clicked(self, position):
+        if self.player.duration() > 0:
+            video_position = int((position / 100) * self.player.duration())
+            self.player.setPosition(video_position)
 
 
 if __name__ == '__main__':
