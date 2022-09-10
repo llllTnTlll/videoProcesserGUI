@@ -1,6 +1,7 @@
+from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog
 from PyQt5.QtMultimedia import QMediaPlayer, QAudioOutput, QMediaContent
-from PyQt5.QtCore import QCoreApplication, QObject, QFileInfo, QUrl, Qt, QEvent, QThread, QMutexLocker, QMutex, pyqtBoundSignal
+from PyQt5.QtCore import *
 from PyQt5 import uic
 import sys
 import cv2 as cv
@@ -8,38 +9,43 @@ from pathlib import Path
 import time
 
 
-class VideoOps:
+class VideoStatus:
     # -1为未加载 1为播放 0为暂停
     VIDEO_NOT_LOADED = -1
     VIDEO_PAUSE = 0
     VIDEO_PLAY = 1
 
 
-class VideoTimer(QThread):
+class Signals(QObject):
+    refresh_signal = pyqtSignal()
+
+
+class VideoPlayer(QThread):
 
     def __init__(self):
         QThread.__init__(self)
-        self.stopped = False
-        self.refresh_rate = 20
-        self.refresh_signal = pyqtBoundSignal()
+        self.player_status = VideoStatus.VIDEO_NOT_LOADED
+        self.refresh_rate = 20.0
         self.mutex = QMutex()
+        self.signals = Signals()
 
     def run(self):
-        with QMutexLocker(self.mutex):
-            self.stopped = False
+        print("started")
         while True:
-            if self.stopped:
-                return
-            self.refresh_signal.emit()
+            print(self.player_status)
+            if self.player_status != VideoStatus.VIDEO_PLAY:
+                continue
+            self.signals.refresh_signal.emit()
             time.sleep(1 / self.refresh_rate)
+            print(self.refresh_rate)
 
-    def stop(self):
+    def play(self):
         with QMutexLocker(self.mutex):
-            self.stopped = True
+            self.player_status = VideoStatus.VIDEO_PLAY
 
-    def is_stopped(self):
+    def pause(self):
         with QMutexLocker(self.mutex):
-            return self.stopped
+            self.player_status = VideoStatus.VIDEO_PAUSE
 
     def set_fps(self, fps):
         self.refresh_rate = fps
@@ -51,7 +57,6 @@ class MainWindow(QWidget):
         # 属性
         self.VIDEO_PATH = None
         self.VIDEO_FPS = 0
-        self.PLAY_STATUS = VideoOps.VIDEO_NOT_LOADED
 
         self.video_capture = cv.VideoCapture()
 
@@ -65,16 +70,14 @@ class MainWindow(QWidget):
         self.ui.openAct.triggered.connect(self.open_act)
 
         # timer
-        self.timer = VideoTimer()
-        self.timer.refresh_signal.signal[str].connect(self.frame_refresh)
+        self.player = VideoPlayer()
+        self.player.signals.refresh_signal.connect(self.frame_refresh)
+        self.player.start()
+
+        self.ui.VideoLabel.setScaledContents(True)
 
     def play_or_pause(self):
-        if self.PLAY_STATUS != VideoOps.VIDEO_NOT_LOADED:
-            if self.PLAY_STATUS == VideoOps.VIDEO_PLAY:
-                self.PLAY_STATUS = VideoOps.VIDEO_PAUSE
-            if self.PLAY_STATUS == VideoOps.VIDEO_PAUSE:
-                self.PLAY_STATUS = VideoOps.VIDEO_PLAY
-        return
+        pass
 
     def open_act(self):
         cap = "open video file"
@@ -86,19 +89,40 @@ class MainWindow(QWidget):
 
             # 获取视频默认帧速率
             self.video_capture.open("./samples/10Hz.mp4")
-            self.VIDEO_FPS = self.video_capture.get(cv.CAP_PROP_FPS)
+            self.player.set_fps(self.video_capture.get(cv.CAP_PROP_FPS))
 
             # 自动播放视频
-            self.PLAY_STATUS = VideoOps.VIDEO_PLAY
+            self.player.player_status = VideoStatus.VIDEO_PLAY
         else:
             pass
 
     def frame_refresh(self):
-        pass
+        def set_pixmap(img):
+            temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
+            temp_pixmap = QPixmap.fromImage(temp_image)
+            self.ui.VideoLabel.setPixmap(temp_pixmap)
+
+        if self.video_capture.isOpened():
+            flag, frame = self.video_capture.read()
+            if flag:
+                frame = cv.resize(frame, (0, 0), fx=0.3, fy=0.3)
+                height, width = frame.shape[:2]
+                if frame.ndim == 3:
+                    rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+                    set_pixmap(rgb)
+                elif frame.ndim == 2:
+                    rgb = cv.cvtColor(frame, cv.COLOR_GRAY2BGR)
+                    set_pixmap(rgb)
+
+            else:
+                print("read failed, no frame data")
+                self.player.pause()
+        else:
+            print("open file or capturing device error, init again")
 
 
 if __name__ == '__main__':
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     app = QApplication(sys.argv)
     w = MainWindow()
     w.ui.show()
