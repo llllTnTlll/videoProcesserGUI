@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>627</width>
-    <height>431</height>
+    <width>972</width>
+    <height>617</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -35,7 +35,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,1">
           <item>
            <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
             <item>
@@ -100,38 +100,102 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
+           <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,2">
             <item>
              <widget class="QGroupBox" name="groupBox">
+              <property name="font">
+               <font>
+                <family>Microsoft YaHei UI</family>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
               <property name="title">
-               <string>功能区</string>
+               <string>参数</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <layout class="QGridLayout" name="gridLayout_2">
+                 <item row="0" column="3">
+                  <widget class="QLineEdit" name="LineEdit_y1"/>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="LineEdit_x1"/>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="label_2">
+                   <property name="text">
+                    <string>Y1</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label">
+                   <property name="text">
+                    <string>X1</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>X2</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="LineEdit_x2"/>
+                 </item>
+                 <item row="1" column="3">
+                  <widget class="QLineEdit" name="LineEdit_y2"/>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Y2</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_2">
+              <property name="font">
+               <font>
+                <family>Microsoft YaHei UI</family>
+               </font>
+              </property>
+              <property name="title">
+               <string>行为</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
-                <widget class="QPushButton" name="pushButton_2">
+                <widget class="QPushButton" name="pushButton">
                  <property name="text">
-                  <string>PushButton</string>
+                  <string>选择兴趣区域</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_4">
+                <widget class="QPushButton" name="pushButton_2">
                  <property name="text">
-                  <string>PushButton</string>
+                  <string>重置</string>
                  </property>
                 </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="pushButton_3">
                  <property name="text">
-                  <string>PushButton</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton">
-                 <property name="text">
-                  <string>PushButton</string>
+                  <string>分析</string>
                  </property>
                 </widget>
                </item>
@@ -158,8 +222,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>627</width>
-     <height>22</height>
+     <width>972</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

@@ -57,11 +57,17 @@ class MainWindow(QWidget):
         # 属性
         self.VIDEO_PATH = None
         self.VIDEO_FPS = 0
+        self.ROI_COORD_LT = (100, 100)
+        self.ROI_COORD_RB = (200, 200)
 
         self.video_capture = cv.VideoCapture()
 
-        # 加载ui文件
+        # 加载ui
         self.ui = uic.loadUi("./res/ui/MainWindow.ui")
+        self.ui.LineEdit_x1.setText("{}".format(self.ROI_COORD_LT[0]))
+        self.ui.LineEdit_y1.setText("{}".format(self.ROI_COORD_LT[1]))
+        self.ui.LineEdit_x2.setText("{}".format(self.ROI_COORD_RB[0]))
+        self.ui.LineEdit_y2.setText("{}".format(self.ROI_COORD_RB[1]))
 
         # 按键功能
         self.ui.playBtn.clicked.connect(self.play_or_pause)
@@ -78,6 +84,15 @@ class MainWindow(QWidget):
 
     def play_or_pause(self):
         pass
+
+    def set_pixmap(self, img, width, height):
+        temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
+        temp_pixmap = QPixmap.fromImage(temp_image)
+        self.ui.VideoLabel.setPixmap(temp_pixmap)
+
+    def draw_roi(self, rgb):
+        rgb = cv.rectangle(rgb, self.ROI_COORD_LT, self.ROI_COORD_RB, (255, 0, 0), 2)
+        return rgb
 
     def open_act(self):
         cap = "open video file"
@@ -97,11 +112,6 @@ class MainWindow(QWidget):
             pass
 
     def frame_refresh(self):
-        def set_pixmap(img):
-            temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
-            temp_pixmap = QPixmap.fromImage(temp_image)
-            self.ui.VideoLabel.setPixmap(temp_pixmap)
-
         if self.video_capture.isOpened():
             flag, frame = self.video_capture.read()
             if flag:
@@ -109,10 +119,10 @@ class MainWindow(QWidget):
                 height, width = frame.shape[:2]
                 if frame.ndim == 3:
                     rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-                    set_pixmap(rgb)
+                    self.set_pixmap(self.draw_roi(rgb), width, height)
                 elif frame.ndim == 2:
                     rgb = cv.cvtColor(frame, cv.COLOR_GRAY2BGR)
-                    set_pixmap(rgb)
+                    self.set_pixmap(self.draw_roi(rgb), width, height)
 
             else:
                 print("read failed, no frame data")
