@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
 from PyQt5.QtMultimedia import QMediaPlayer, QAudioOutput, QMediaContent
 from PyQt5.QtCore import *
 from PyQt5 import uic
@@ -30,14 +30,11 @@ class VideoPlayer(QThread):
         self.signals = Signals()
 
     def run(self):
-        print("started")
         while True:
-            print(self.player_status)
             if self.player_status != VideoStatus.VIDEO_PLAY:
                 continue
             self.signals.refresh_signal.emit()
             time.sleep(1 / self.refresh_rate)
-            print(self.refresh_rate)
 
     def play(self):
         with QMutexLocker(self.mutex):
@@ -64,10 +61,7 @@ class MainWindow(QWidget):
 
         # 加载ui
         self.ui = uic.loadUi("./res/ui/MainWindow.ui")
-        self.ui.LineEdit_x1.setText("{}".format(self.ROI_COORD_LT[0]))
-        self.ui.LineEdit_y1.setText("{}".format(self.ROI_COORD_LT[1]))
-        self.ui.LineEdit_x2.setText("{}".format(self.ROI_COORD_RB[0]))
-        self.ui.LineEdit_y2.setText("{}".format(self.ROI_COORD_RB[1]))
+        self.reset_coord()
 
         # 按键功能
         self.ui.playBtn.clicked.connect(self.play_or_pause)
@@ -82,8 +76,19 @@ class MainWindow(QWidget):
 
         self.ui.VideoLabel.setScaledContents(True)
 
+        self.ui.LineEdit_x1.editingFinished.connect(self.coord_changed)
+        self.ui.LineEdit_x2.editingFinished.connect(self.coord_changed)
+        self.ui.LineEdit_y1.editingFinished.connect(self.coord_changed)
+        self.ui.LineEdit_y2.editingFinished.connect(self.coord_changed)
+
     def play_or_pause(self):
         pass
+
+    def reset_coord(self):
+        self.ui.LineEdit_x1.setText("{}".format(self.ROI_COORD_LT[0]))
+        self.ui.LineEdit_y1.setText("{}".format(self.ROI_COORD_LT[1]))
+        self.ui.LineEdit_x2.setText("{}".format(self.ROI_COORD_RB[0]))
+        self.ui.LineEdit_y2.setText("{}".format(self.ROI_COORD_RB[1]))
 
     def set_pixmap(self, img, width, height):
         temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
@@ -129,6 +134,14 @@ class MainWindow(QWidget):
                 self.player.pause()
         else:
             print("open file or capturing device error, init again")
+
+    def coord_changed(self):
+        try:
+            p1 = (int(self.ui.LineEdit_x1.text()), int(self.ui.LineEdit_y1.text()))
+            p2 = (int(self.ui.LineEdit_x2.text()), int(self.ui.LineEdit_y2.text()))
+        except ValueError:
+            self.reset_coord()
+            QMessageBox(QMessageBox.Warning, 'Warning', '坐标输入非法').exec()
 
 
 if __name__ == '__main__':

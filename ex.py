@@ -149,11 +149,11 @@ class VideoTimer(QThread):
         self.frequent = fps
 
 
-if __name__ == "__main__":
-   app = QApplication(sys.argv)
-   box = VideoBox("home.mp4")
-   box.show()
-   sys.exit(app.exec_())
+# if __name__ == "__main__":
+#    app = QApplication(sys.argv)
+#    box = VideoBox("home.mp4")
+#    box.show()
+#    sys.exit(app.exec_())
 
 
 #!/usr/bin/python3
@@ -204,7 +204,5 @@ class Example(QMainWindow):
 
 
 if __name__ == '__main__':
-
-    app = QApplication(sys.argv)
-    ex = Example()
-    sys.exit(app.exec_())
+    a = "assa"
+    int(a)
