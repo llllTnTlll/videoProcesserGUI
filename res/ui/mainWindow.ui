@@ -209,7 +209,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_3">
+                <widget class="QPushButton" name="analysisBtn">
                  <property name="text">
                   <string>分析</string>
                  </property>
@@ -252,7 +252,7 @@
      <x>0</x>
      <y>0</y>
      <width>972</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">

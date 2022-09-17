@@ -7,6 +7,7 @@ import sys
 import cv2 as cv
 from pathlib import Path
 import time
+import resultWindow
 
 
 class VideoStatus:
@@ -54,10 +55,12 @@ class MainWindow(QWidget):
         # 属性
         self.VIDEO_PATH = None
         self.VIDEO_FPS = 0
-        self.ROI_COORD_LT = (100, 100)
-        self.ROI_COORD_RB = (200, 200)
+        self.ROI_COORD_LT = (130, 160)
+        self.ROI_COORD_RB = (250, 290)
 
         self.video_capture = cv.VideoCapture()
+
+        self.resultWindow = resultWindow.ResultWindow()
 
         # 加载ui
         self.ui = uic.loadUi("./res/ui/MainWindow.ui")
@@ -68,6 +71,7 @@ class MainWindow(QWidget):
 
         # 动作
         self.ui.openAct.triggered.connect(self.open_act)
+        self.ui.analysisBtn.clicked.connect(self.analysis)
 
         # timer
         self.player = VideoPlayer()
@@ -81,24 +85,7 @@ class MainWindow(QWidget):
         self.ui.LineEdit_y1.editingFinished.connect(self.coord_changed)
         self.ui.LineEdit_y2.editingFinished.connect(self.coord_changed)
 
-    def play_or_pause(self):
-        pass
-
-    def reset_coord(self):
-        self.ui.LineEdit_x1.setText("{}".format(self.ROI_COORD_LT[0]))
-        self.ui.LineEdit_y1.setText("{}".format(self.ROI_COORD_LT[1]))
-        self.ui.LineEdit_x2.setText("{}".format(self.ROI_COORD_RB[0]))
-        self.ui.LineEdit_y2.setText("{}".format(self.ROI_COORD_RB[1]))
-
-    def set_pixmap(self, img, width, height):
-        temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
-        temp_pixmap = QPixmap.fromImage(temp_image)
-        self.ui.VideoLabel.setPixmap(temp_pixmap)
-
-    def draw_roi(self, rgb):
-        rgb = cv.rectangle(rgb, self.ROI_COORD_LT, self.ROI_COORD_RB, (255, 0, 0), 2)
-        return rgb
-
+    # 基本功能与按键响应
     def open_act(self):
         cap = "open video file"
         filt = "视频文件(*.wmv *.avi *.mp4 *.mov)"
@@ -115,6 +102,26 @@ class MainWindow(QWidget):
             self.player.player_status = VideoStatus.VIDEO_PLAY
         else:
             pass
+
+    def analysis(self):
+        self.resultWindow.ROI_COORD_LT = self.ROI_COORD_LT
+        self.resultWindow.ROI_COORD_RB = self.ROI_COORD_RB
+        self.resultWindow.VIDEO_PATH = self.VIDEO_PATH
+        self.resultWindow.analysis()
+        self.resultWindow.ui.show()
+
+    # 视频相关
+    def play_or_pause(self):
+        pass
+
+    def set_pixmap(self, img, width, height):
+        temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
+        temp_pixmap = QPixmap.fromImage(temp_image)
+        self.ui.VideoLabel.setPixmap(temp_pixmap)
+
+    def draw_roi(self, rgb):
+        rgb = cv.rectangle(rgb, self.ROI_COORD_LT, self.ROI_COORD_RB, (255, 0, 0), 2)
+        return rgb
 
     def frame_refresh(self):
         if self.video_capture.isOpened():
@@ -135,13 +142,29 @@ class MainWindow(QWidget):
         else:
             print("open file or capturing device error, init again")
 
+    # 兴趣区域相关
+    def reset_coord(self):
+        self.ui.LineEdit_x1.setText("{}".format(self.ROI_COORD_LT[0]))
+        self.ui.LineEdit_y1.setText("{}".format(self.ROI_COORD_LT[1]))
+        self.ui.LineEdit_x2.setText("{}".format(self.ROI_COORD_RB[0]))
+        self.ui.LineEdit_y2.setText("{}".format(self.ROI_COORD_RB[1]))
+
     def coord_changed(self):
         try:
             p1 = (int(self.ui.LineEdit_x1.text()), int(self.ui.LineEdit_y1.text()))
             p2 = (int(self.ui.LineEdit_x2.text()), int(self.ui.LineEdit_y2.text()))
         except ValueError:
             self.reset_coord()
+            QMessageBox(QMessageBox.Warning, 'Warning', '请输入整数型坐标值').exec()
+            return
+
+        if p1[0] < p2[0] and p1[1] < p2[1]:
+            self.ROI_COORD_LT = p1
+            self.ROI_COORD_RB = p2
+        else:
+            self.reset_coord()
             QMessageBox(QMessageBox.Warning, 'Warning', '坐标输入非法').exec()
+            return
 
 
 if __name__ == '__main__':
