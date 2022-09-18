@@ -14,6 +14,7 @@ class ResultWindow(QWidget):
         self.ROI_COORD_LT = None
         self.ROI_COORD_RB = None
         self.VIDEO_PATH = None
+        self.SCALE_RATE = 0.3
 
     def analysis(self):
         if self.ROI_COORD_LT is not None and self.ROI_COORD_RB is not None and self.VIDEO_PATH is not None:
@@ -27,10 +28,10 @@ class ResultWindow(QWidget):
                 ret, frame = capture.read()
                 if ret:
                     # 读取坐标
-                    x_min = self.ROI_COORD_LT[0] * 3
-                    x_max = self.ROI_COORD_RB[0] * 3
-                    y_min = self.ROI_COORD_LT[1] * 3
-                    y_max = self.ROI_COORD_RB[1] * 3
+                    x_min = int(self.ROI_COORD_LT[0] * (1 / self.SCALE_RATE))
+                    x_max = int(self.ROI_COORD_RB[0] * (1 / self.SCALE_RATE))
+                    y_min = int(self.ROI_COORD_LT[1] * (1 / self.SCALE_RATE))
+                    y_max = int(self.ROI_COORD_RB[1] * (1 / self.SCALE_RATE))
 
                     # # 对图像进行深度复制
                     # copied = np.empty_like(frame)

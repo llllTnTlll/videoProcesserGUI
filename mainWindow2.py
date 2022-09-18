@@ -8,6 +8,7 @@ import cv2 as cv
 from pathlib import Path
 import time
 import resultWindow
+import numpy as np
 
 
 class VideoStatus:
@@ -57,6 +58,8 @@ class MainWindow(QWidget):
         self.VIDEO_FPS = 0
         self.ROI_COORD_LT = (130, 160)
         self.ROI_COORD_RB = (250, 290)
+        self.SCALE_RATE = 0.3
+        self.CURTAIN_SIZE = (600, 400)
 
         self.video_capture = cv.VideoCapture()
 
@@ -68,10 +71,10 @@ class MainWindow(QWidget):
 
         # 按键功能
         self.ui.playBtn.clicked.connect(self.play_or_pause)
+        self.ui.analysisBtn.clicked.connect(self.analysis)
 
         # 动作
         self.ui.openAct.triggered.connect(self.open_act)
-        self.ui.analysisBtn.clicked.connect(self.analysis)
 
         # timer
         self.player = VideoPlayer()
@@ -85,6 +88,8 @@ class MainWindow(QWidget):
         self.ui.LineEdit_y1.editingFinished.connect(self.coord_changed)
         self.ui.LineEdit_y2.editingFinished.connect(self.coord_changed)
 
+        self.set_curtain()
+
     # 基本功能与按键响应
     def open_act(self):
         cap = "open video file"
@@ -95,11 +100,11 @@ class MainWindow(QWidget):
             self.VIDEO_PATH = path
 
             # 获取视频默认帧速率
-            self.video_capture.open("./samples/10Hz.mp4")
+            self.video_capture.open(self.VIDEO_PATH)
             self.player.set_fps(self.video_capture.get(cv.CAP_PROP_FPS))
 
             # 自动播放视频
-            self.player.player_status = VideoStatus.VIDEO_PLAY
+            self.video_play(is_first=True)
         else:
             pass
 
@@ -112,7 +117,25 @@ class MainWindow(QWidget):
 
     # 视频相关
     def play_or_pause(self):
-        pass
+        print(self.player.player_status)
+        if self.player.player_status == VideoStatus.VIDEO_PLAY:
+            self.video_pause()
+        elif self.player.player_status == VideoStatus.VIDEO_PAUSE:
+            self.video_play()
+
+    def video_play(self, is_first=False):
+        if self.player.player_status != VideoStatus.VIDEO_NOT_LOADED or is_first:
+            self.player.player_status = VideoStatus.VIDEO_PLAY
+            self.ui.playBtn.setStyleSheet("QPushButton{qproperty-icon:url(res/icon/pause.png)}")
+
+    def video_pause(self):
+        if self.player.player_status != VideoStatus.VIDEO_NOT_LOADED:
+            self.player.player_status = VideoStatus.VIDEO_PAUSE
+            self.ui.playBtn.setStyleSheet("QPushButton{qproperty-icon:url(res/icon/play.png)}")
+
+    def set_curtain(self):
+        img = np.zeros((self.CURTAIN_SIZE[0], self.CURTAIN_SIZE[1], 3), np.uint8)
+        self.set_pixmap(img, self.CURTAIN_SIZE[0], self.CURTAIN_SIZE[1])
 
     def set_pixmap(self, img, width, height):
         temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
@@ -127,7 +150,7 @@ class MainWindow(QWidget):
         if self.video_capture.isOpened():
             flag, frame = self.video_capture.read()
             if flag:
-                frame = cv.resize(frame, (0, 0), fx=0.3, fy=0.3)
+                frame = cv.resize(frame, (0, 0), fx=self.SCALE_RATE, fy=self.SCALE_RATE)
                 height, width = frame.shape[:2]
                 if frame.ndim == 3:
                     rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
@@ -138,7 +161,7 @@ class MainWindow(QWidget):
 
             else:
                 print("read failed, no frame data")
-                self.player.pause()
+                self.video_pause()
         else:
             print("open file or capturing device error, init again")
 
