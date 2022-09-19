@@ -124,7 +124,7 @@ class MainWindow(QWidget):
         self.resultWindow.ROI_COORD_LT = self.ROI_COORD_LT
         self.resultWindow.ROI_COORD_RB = self.ROI_COORD_RB
         self.resultWindow.VIDEO_PATH = self.VIDEO_PATH
-        self.resultWindow.analysis()
+        self.resultWindow.init_result()
         self.resultWindow.ui.show()
 
     # 视频相关

@@ -1,6 +1,6 @@
 import io
 from PIL import Image
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QHeaderView, QTableWidgetItem
 from PyQt5 import uic
 import cv2 as cv
 import matplotlib.pyplot as plt
@@ -15,6 +15,13 @@ class ResultWindow(QWidget):
         self.ROI_COORD_RB = None
         self.VIDEO_PATH = None
         self.SCALE_RATE = 0.3
+        self.X_POINTS = []
+        self.Y_POINTS = []
+
+    def init_result(self):
+        self.analysis()
+        self.set_label()
+        self.set_table(self.Y_POINTS)
 
     def analysis(self):
         if self.ROI_COORD_LT is not None and self.ROI_COORD_RB is not None and self.VIDEO_PATH is not None:
@@ -49,8 +56,21 @@ class ResultWindow(QWidget):
                     break
                 frame_count += 1
 
-            img = self.draw_chart(x_points, y_points)
-            self.ui.resultLabel.setPixmap(img.toqpixmap())
+            self.X_POINTS = x_points
+            self.Y_POINTS = y_points
+
+    def set_table(self, yp):
+        self.ui.resultTable.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.ui.resultTable.setColumnCount(1)
+        self.ui.resultTable.setRowCount(len(yp))
+        self.ui.resultTable.setHorizontalHeaderLabels(['GrayValue'])
+        for i in range(len(yp)):
+            item = QTableWidgetItem(str(yp[i]))
+            self.ui.resultTable.setItem(i, 0, item)
+
+    def set_label(self):
+        img = self.draw_chart(self.X_POINTS, self.Y_POINTS)
+        self.ui.resultLabel.setPixmap(img.toqpixmap())
 
     @staticmethod
     def get_avg_gray_value(img):
