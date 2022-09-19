@@ -60,6 +60,8 @@ class ResultWindow(QWidget):
 
     @staticmethod
     def draw_chart(x_points, y_points):
+        plt.cla()
+        plt.title("GRAYVALUE CHANGE DIAGRAM ")
         plt.plot(x_points, y_points)
         buffer = io.BytesIO()
         plt.savefig(buffer, format='PNG')

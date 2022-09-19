@@ -30,13 +30,15 @@ class VideoPlayer(QThread):
         self.refresh_rate = 20.0
         self.mutex = QMutex()
         self.signals = Signals()
+        self.is_slider_pressed = False
 
     def run(self):
         while True:
             if self.player_status != VideoStatus.VIDEO_PLAY:
                 continue
-            self.signals.refresh_signal.emit()
-            time.sleep(1 / self.refresh_rate)
+            if not self.is_slider_pressed:
+                self.signals.refresh_signal.emit()
+                time.sleep(1 / self.refresh_rate)
 
     def play(self):
         with QMutexLocker(self.mutex):
@@ -49,6 +51,12 @@ class VideoPlayer(QThread):
     def set_fps(self, fps):
         self.refresh_rate = fps
 
+    def slider_pressed(self):
+        self.is_slider_pressed = True
+
+    def slider_released(self):
+        self.is_slider_pressed = False
+
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -56,8 +64,12 @@ class MainWindow(QWidget):
         # 属性
         self.VIDEO_PATH = None
         self.VIDEO_FPS = 0
+        self.VIDEO_FRAME_COUNT = 0
+        self.VIDEO_FRAME_NOW = 0
         self.ROI_COORD_LT = (130, 160)
         self.ROI_COORD_RB = (250, 290)
+        self.ROI_COLOR = (255, 0, 0)
+        self.ROI_THICKNESS = 2
         self.SCALE_RATE = 0.3
         self.CURTAIN_SIZE = (600, 400)
 
@@ -76,11 +88,12 @@ class MainWindow(QWidget):
         # 动作
         self.ui.openAct.triggered.connect(self.open_act)
 
-        # timer
+        # 视频播放
         self.player = VideoPlayer()
         self.player.signals.refresh_signal.connect(self.frame_refresh)
         self.player.start()
-
+        self.ui.videoSlider.sliderMoved.connect(self.slider_moved)
+        self.ui.videoSlider.sliderReleased.connect(self.slider_released)
         self.ui.VideoLabel.setScaledContents(True)
 
         self.ui.LineEdit_x1.editingFinished.connect(self.coord_changed)
@@ -88,25 +101,24 @@ class MainWindow(QWidget):
         self.ui.LineEdit_y1.editingFinished.connect(self.coord_changed)
         self.ui.LineEdit_y2.editingFinished.connect(self.coord_changed)
 
+        self.behaviors_lock(True)
         self.set_curtain()
 
     # 基本功能与按键响应
+    def behaviors_lock(self, status):
+        if status:
+            self.ui.behaviors_groupBox.setEnabled(False)
+        elif not status:
+            self.ui.behaviors_groupBox.setEnabled(True)
+
     def open_act(self):
         cap = "open video file"
         filt = "视频文件(*.wmv *.avi *.mp4 *.mov)"
         path = QFileDialog.getOpenFileName(caption=cap, filter=filt)[0]
         if path != "" and Path(path).is_file():
-            # 存储路径
-            self.VIDEO_PATH = path
-
-            # 获取视频默认帧速率
-            self.video_capture.open(self.VIDEO_PATH)
-            self.player.set_fps(self.video_capture.get(cv.CAP_PROP_FPS))
-
-            # 自动播放视频
+            self.video_init(path)
             self.video_play(is_first=True)
-        else:
-            pass
+            self.behaviors_lock(False)
 
     def analysis(self):
         self.resultWindow.ROI_COORD_LT = self.ROI_COORD_LT
@@ -117,36 +129,78 @@ class MainWindow(QWidget):
 
     # 视频相关
     def play_or_pause(self):
+        """视频暂停播放按钮"""
         print(self.player.player_status)
         if self.player.player_status == VideoStatus.VIDEO_PLAY:
             self.video_pause()
         elif self.player.player_status == VideoStatus.VIDEO_PAUSE:
             self.video_play()
 
+    def display_progress(self):
+        position = int((self.VIDEO_FRAME_NOW/self.VIDEO_FRAME_COUNT) * 100)
+        if not self.player.is_slider_pressed:
+            self.ui.videoSlider.setSliderPosition(position)
+        self.ui.ratioLabel.setText("Frame {} of {}".format(str(self.VIDEO_FRAME_NOW), str(self.VIDEO_FRAME_COUNT)))
+
+    def set_progress(self, frame_now, frame_count=None):
+        if frame_count is not None:
+            self.VIDEO_FRAME_COUNT = frame_count
+        self.VIDEO_FRAME_NOW = frame_now
+        self.display_progress()
+
+    def video_init(self, path):
+        # 存储路径
+        self.VIDEO_PATH = path
+
+        # 获取视频默认帧速率与总帧数
+        self.video_capture.open(self.VIDEO_PATH)
+        self.player.set_fps(int(self.video_capture.get(cv.CAP_PROP_FPS)))
+
+        # 设置进度label
+        self.set_progress(0, int(self.video_capture.get(cv.CAP_PROP_FRAME_COUNT)))
+
     def video_play(self, is_first=False):
         if self.player.player_status != VideoStatus.VIDEO_NOT_LOADED or is_first:
-            self.player.player_status = VideoStatus.VIDEO_PLAY
+            self.player.play()
             self.ui.playBtn.setStyleSheet("QPushButton{qproperty-icon:url(res/icon/pause.png)}")
 
     def video_pause(self):
         if self.player.player_status != VideoStatus.VIDEO_NOT_LOADED:
-            self.player.player_status = VideoStatus.VIDEO_PAUSE
+            self.player.pause()
             self.ui.playBtn.setStyleSheet("QPushButton{qproperty-icon:url(res/icon/play.png)}")
 
+    def video_reset(self):
+        self.VIDEO_FRAME_NOW = 0
+        self.video_capture.set(cv.CAP_PROP_POS_FRAMES, 0)
+        self.video_pause()
+
+    def slider_moved(self, position):
+        self.player.slider_pressed()
+        if self.player.player_status != VideoStatus.VIDEO_NOT_LOADED:
+            target_frame = int((position / 100) * self.VIDEO_FRAME_COUNT)
+            self.video_capture.set(cv.CAP_PROP_POS_FRAMES, target_frame)
+            self.set_progress(target_frame)
+
+    def slider_released(self):
+        self.player.slider_released()
+
     def set_curtain(self):
+        """初始化幕布"""
         img = np.zeros((self.CURTAIN_SIZE[0], self.CURTAIN_SIZE[1], 3), np.uint8)
         self.set_pixmap(img, self.CURTAIN_SIZE[0], self.CURTAIN_SIZE[1])
 
     def set_pixmap(self, img, width, height):
+        """帧格式转化与label刷新"""
         temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
         temp_pixmap = QPixmap.fromImage(temp_image)
         self.ui.VideoLabel.setPixmap(temp_pixmap)
 
     def draw_roi(self, rgb):
-        rgb = cv.rectangle(rgb, self.ROI_COORD_LT, self.ROI_COORD_RB, (255, 0, 0), 2)
+        rgb = cv.rectangle(rgb, self.ROI_COORD_LT, self.ROI_COORD_RB, self.ROI_COLOR, self.ROI_THICKNESS)
         return rgb
 
     def frame_refresh(self):
+        """帧重绘"""
         if self.video_capture.isOpened():
             flag, frame = self.video_capture.read()
             if flag:
@@ -158,10 +212,12 @@ class MainWindow(QWidget):
                 elif frame.ndim == 2:
                     rgb = cv.cvtColor(frame, cv.COLOR_GRAY2BGR)
                     self.set_pixmap(self.draw_roi(rgb), width, height)
+                self.VIDEO_FRAME_NOW += 1
+                self.display_progress()
 
             else:
                 print("read failed, no frame data")
-                self.video_pause()
+                self.video_reset()
         else:
             print("open file or capturing device error, init again")
 

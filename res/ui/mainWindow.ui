@@ -52,7 +52,7 @@
              </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
+             <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
               <item>
                <widget class="QPushButton" name="playBtn">
                 <property name="text">
@@ -73,25 +73,13 @@
               </item>
               <item>
                <widget class="QLabel" name="ratioLabel">
-                <property name="text">
-                 <string>0:00/0:00</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="fullscreenBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+                <property name="font">
+                 <font>
+                  <family>Microsoft YaHei UI</family>
+                 </font>
                 </property>
                 <property name="text">
-                 <string/>
-                </property>
-                <property name="icon">
-                 <iconset>
-                  <normaloff>../icon/fullscreen.png</normaloff>../icon/fullscreen.png</iconset>
+                 <string>Frame 0 of 0</string>
                 </property>
                </widget>
               </item>
@@ -102,7 +90,10 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,2">
             <item>
-             <widget class="QGroupBox" name="groupBox">
+             <widget class="QGroupBox" name="parameters_groupBox">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="font">
                <font>
                 <family>Microsoft YaHei UI</family>
@@ -184,7 +175,10 @@
              </widget>
             </item>
             <item>
-             <widget class="QGroupBox" name="groupBox_2">
+             <widget class="QGroupBox" name="behaviors_groupBox">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="font">
                <font>
                 <family>Microsoft YaHei UI</family>
