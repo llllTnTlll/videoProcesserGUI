@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>972</width>
-    <height>617</height>
+    <width>1046</width>
+    <height>698</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -60,7 +60,7 @@
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>../icon/play.png</normaloff>../icon/play.png</iconset>
+                  <normaloff>../../../../../../.designer/icon/play.png</normaloff>../../../../../../.designer/icon/play.png</iconset>
                 </property>
                </widget>
               </item>
@@ -88,7 +88,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,2">
+           <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,2">
             <item>
              <widget class="QGroupBox" name="parameters_groupBox">
               <property name="enabled">
@@ -114,13 +114,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="LineEdit_x1">
-                   <property name="focusPolicy">
-                    <enum>Qt::ClickFocus</enum>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="0" column="2">
                   <widget class="QLabel" name="label_2">
                    <property name="text">
@@ -141,20 +134,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="1" column="0">
-                  <widget class="QLabel" name="label_3">
-                   <property name="text">
-                    <string>X2</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="LineEdit_x2">
-                   <property name="focusPolicy">
-                    <enum>Qt::ClickFocus</enum>
-                   </property>
-                  </widget>
-                 </item>
                  <item row="1" column="3">
                   <widget class="QLineEdit" name="LineEdit_y2">
                    <property name="focusPolicy">
@@ -169,7 +148,101 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="0" column="1">
+                  <widget class="QLineEdit" name="LineEdit_x1">
+                   <property name="focusPolicy">
+                    <enum>Qt::ClickFocus</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QLineEdit" name="LineEdit_x2">
+                   <property name="focusPolicy">
+                    <enum>Qt::ClickFocus</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>X2</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton">
+                 <property name="text">
+                  <string>从当前帧选择ROI</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox">
+              <property name="font">
+               <font>
+                <family>Microsoft YaHei UI</family>
+               </font>
+              </property>
+              <property name="title">
+               <string>画笔</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <layout class="QGridLayout" name="gridLayout">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_5">
+                   <property name="text">
+                    <string>画笔颜色</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QComboBox" name="comboBox"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_6">
+                   <property name="text">
+                    <string>画笔宽度</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QComboBox" name="comboBox_2"/>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_2">
+              <property name="font">
+               <font>
+                <family>Microsoft YaHei UI</family>
+               </font>
+              </property>
+              <property name="title">
+               <string>视频</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_8">
+               <item>
+                <widget class="QCheckBox" name="ingray_checkBox">
+                 <property name="text">
+                  <string>以灰度图播放视频</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="rply_checkbox">
+                 <property name="text">
+                  <string>自动重播</string>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -185,16 +258,9 @@
                </font>
               </property>
               <property name="title">
-               <string>行为</string>
+               <string>功能</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
-               <item>
-                <widget class="QPushButton" name="pushButton">
-                 <property name="text">
-                  <string>选择兴趣区域</string>
-                 </property>
-                </widget>
-               </item>
                <item>
                 <widget class="QPushButton" name="pushButton_2">
                  <property name="text">
@@ -245,7 +311,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>972</width>
+     <width>1046</width>
      <height>26</height>
     </rect>
    </property>
@@ -254,7 +320,6 @@
      <string>文件</string>
     </property>
     <addaction name="openAct"/>
-    <addaction name="saveAct"/>
     <addaction name="separator"/>
     <addaction name="settingAct"/>
    </widget>
@@ -286,7 +351,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="openAct"/>
-   <addaction name="saveAct"/>
    <addaction name="separator"/>
    <addaction name="settingAct"/>
   </widget>
@@ -297,15 +361,6 @@
    </property>
    <property name="text">
     <string>打开</string>
-   </property>
-  </action>
-  <action name="saveAct">
-   <property name="icon">
-    <iconset>
-     <normaloff>../icon/save.png</normaloff>../icon/save.png</iconset>
-   </property>
-   <property name="text">
-    <string>保存</string>
    </property>
   </action>
   <action name="settingAct">

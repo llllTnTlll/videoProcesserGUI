@@ -1,14 +1,15 @@
+import sys
+import time
+from pathlib import Path
+
+import cv2 as cv
+import numpy as np
+from PyQt5 import uic
+from PyQt5.QtCore import *
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
-from PyQt5.QtMultimedia import QMediaPlayer, QAudioOutput, QMediaContent
-from PyQt5.QtCore import *
-from PyQt5 import uic
-import sys
-import cv2 as cv
-from pathlib import Path
-import time
+
 import resultWindow
-import numpy as np
 
 
 class VideoStatus:
@@ -137,7 +138,7 @@ class MainWindow(QWidget):
             self.video_play()
 
     def display_progress(self):
-        position = int((self.VIDEO_FRAME_NOW/self.VIDEO_FRAME_COUNT) * 100)
+        position = int((self.VIDEO_FRAME_NOW / self.VIDEO_FRAME_COUNT) * 100)
         if not self.player.is_slider_pressed:
             self.ui.videoSlider.setSliderPosition(position)
         self.ui.ratioLabel.setText("Frame {} of {}".format(str(self.VIDEO_FRAME_NOW), str(self.VIDEO_FRAME_COUNT)))
@@ -159,6 +160,12 @@ class MainWindow(QWidget):
         # 设置进度label
         self.set_progress(0, int(self.video_capture.get(cv.CAP_PROP_FRAME_COUNT)))
 
+        # 设置幕布大小
+        height = int(self.video_capture.get(cv.CAP_PROP_FRAME_HEIGHT) * self.SCALE_RATE)
+        width = int(self.video_capture.get(cv.CAP_PROP_FRAME_WIDTH) * self.SCALE_RATE)
+        self.CURTAIN_SIZE = (width, height)
+        self.set_curtain()
+
     def video_play(self, is_first=False):
         if self.player.player_status != VideoStatus.VIDEO_NOT_LOADED or is_first:
             self.player.play()
@@ -172,7 +179,6 @@ class MainWindow(QWidget):
     def video_reset(self):
         self.VIDEO_FRAME_NOW = 0
         self.video_capture.set(cv.CAP_PROP_POS_FRAMES, 0)
-        self.video_pause()
 
     def slider_moved(self, position):
         self.player.slider_pressed()
@@ -195,9 +201,12 @@ class MainWindow(QWidget):
         temp_pixmap = QPixmap.fromImage(temp_image)
         self.ui.VideoLabel.setPixmap(temp_pixmap)
 
-    def draw_roi(self, rgb):
-        rgb = cv.rectangle(rgb, self.ROI_COORD_LT, self.ROI_COORD_RB, self.ROI_COLOR, self.ROI_THICKNESS)
-        return rgb
+    def process(self, rgb):
+        if self.ui.ingray_checkBox.isChecked():
+            gray = cv.cvtColor(rgb, cv.COLOR_RGB2GRAY)
+            rgb = cv.cvtColor(gray, cv.COLOR_GRAY2RGB)
+        processed = cv.rectangle(rgb, self.ROI_COORD_LT, self.ROI_COORD_RB, self.ROI_COLOR, self.ROI_THICKNESS)
+        return processed
 
     def frame_refresh(self):
         """帧重绘"""
@@ -208,16 +217,21 @@ class MainWindow(QWidget):
                 height, width = frame.shape[:2]
                 if frame.ndim == 3:
                     rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-                    self.set_pixmap(self.draw_roi(rgb), width, height)
+                    self.set_pixmap(self.process(rgb), width, height)
                 elif frame.ndim == 2:
                     rgb = cv.cvtColor(frame, cv.COLOR_GRAY2BGR)
-                    self.set_pixmap(self.draw_roi(rgb), width, height)
+                    self.set_pixmap(self.process(rgb), width, height)
                 self.VIDEO_FRAME_NOW += 1
                 self.display_progress()
 
             else:
-                print("read failed, no frame data")
-                self.video_reset()
+                # 当播放结束时
+                if self.ui.rply_checkbox.isChecked():
+                    self.video_reset()
+                    self.video_play()
+                else:
+                    self.video_reset()
+                    self.video_pause()
         else:
             print("open file or capturing device error, init again")
 
@@ -238,12 +252,15 @@ class MainWindow(QWidget):
             return
 
         if p1[0] < p2[0] and p1[1] < p2[1]:
-            self.ROI_COORD_LT = p1
-            self.ROI_COORD_RB = p2
-        else:
-            self.reset_coord()
-            QMessageBox(QMessageBox.Warning, 'Warning', '坐标输入非法').exec()
-            return
+            if p1[0] > 0 and p1[1] > 0:
+                if p2[0] > 0 and p2[1] > 0:
+                    if p1[0] < self.CURTAIN_SIZE[0] and p2[0] < self.CURTAIN_SIZE[0]:
+                        if p1[1] < self.CURTAIN_SIZE[1] and p2[1] < self.CURTAIN_SIZE[1]:
+                            self.ROI_COORD_LT = p1
+                            self.ROI_COORD_RB = p2
+                            return
+        self.reset_coord()
+        QMessageBox(QMessageBox.Warning, 'Warning', '坐标输入非法').exec()
 
 
 if __name__ == '__main__':
