@@ -1,13 +1,12 @@
 import sys
 import time
 from pathlib import Path
-
 import cv2 as cv
 import numpy as np
-from PyQt5 import uic
+from PyQt5 import uic, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox, QProgressBar
 
 import resultWindow
 
@@ -67,11 +66,11 @@ class MainWindow(QWidget):
         self.VIDEO_FPS = 0
         self.VIDEO_FRAME_COUNT = 0
         self.VIDEO_FRAME_NOW = 0
-        self.ROI_COORD_LT = (130, 160)
-        self.ROI_COORD_RB = (250, 290)
+        self.ROI_COORD_LT = (400, 500)
+        self.ROI_COORD_RB = (850, 1000)
         self.ROI_COLOR = (255, 0, 0)
         self.ROI_THICKNESS = 2
-        self.SCALE_RATE = 0.3
+        self.SCALE_RATE = 1
         self.CURTAIN_SIZE = (600, 400)
 
         self.video_capture = cv.VideoCapture()
@@ -84,7 +83,7 @@ class MainWindow(QWidget):
 
         # 按键功能
         self.ui.playBtn.clicked.connect(self.play_or_pause)
-        self.ui.analysisBtn.clicked.connect(self.analysis)
+        # self.ui.analysisBtn.clicked.connect(self.start_analysis)
 
         # 动作
         self.ui.openAct.triggered.connect(self.open_act)
@@ -121,12 +120,16 @@ class MainWindow(QWidget):
             self.video_play(is_first=True)
             self.behaviors_lock(False)
 
-    def analysis(self):
-        self.resultWindow.ROI_COORD_LT = self.ROI_COORD_LT
-        self.resultWindow.ROI_COORD_RB = self.ROI_COORD_RB
-        self.resultWindow.VIDEO_PATH = self.VIDEO_PATH
-        self.resultWindow.init_result()
-        self.resultWindow.ui.show()
+    # def start_analysis(self):
+    #     # bar = QProgressBar()
+    #     # bar.setRange(0, 0)
+    #     # self.ui.statusbar.addWidget(bar)
+    #
+    #     self.resultWindow.ROI_COORD_LT = self.ROI_COORD_LT
+    #     self.resultWindow.ROI_COORD_RB = self.ROI_COORD_RB
+    #     self.resultWindow.VIDEO_PATH = self.VIDEO_PATH
+    #     self.resultWindow.SCALE_RATE = 1
+    #     self.resultWindow.init_result()
 
     # 视频相关
     def play_or_pause(self):
@@ -193,12 +196,14 @@ class MainWindow(QWidget):
     def set_curtain(self):
         """初始化幕布"""
         img = np.zeros((self.CURTAIN_SIZE[0], self.CURTAIN_SIZE[1], 3), np.uint8)
+        self.ui.VideoLabel.resize(self.CURTAIN_SIZE[0], self.CURTAIN_SIZE[1])
         self.set_pixmap(img, self.CURTAIN_SIZE[0], self.CURTAIN_SIZE[1])
 
     def set_pixmap(self, img, width, height):
         """帧格式转化与label刷新"""
         temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
         temp_pixmap = QPixmap.fromImage(temp_image)
+        temp_pixmap.scaled(self.CURTAIN_SIZE[0], self.CURTAIN_SIZE[1])
         self.ui.VideoLabel.setPixmap(temp_pixmap)
 
     def process(self, rgb):
@@ -243,6 +248,7 @@ class MainWindow(QWidget):
         self.ui.LineEdit_y2.setText("{}".format(self.ROI_COORD_RB[1]))
 
     def coord_changed(self):
+
         try:
             p1 = (int(self.ui.LineEdit_x1.text()), int(self.ui.LineEdit_y1.text()))
             p2 = (int(self.ui.LineEdit_x2.text()), int(self.ui.LineEdit_y2.text()))

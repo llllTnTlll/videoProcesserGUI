@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1046</width>
-    <height>698</height>
+    <width>1027</width>
+    <height>649</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -40,6 +40,12 @@
            <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
             <item>
              <widget class="QLabel" name="VideoLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -60,7 +66,7 @@
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>../../../../../../.designer/icon/play.png</normaloff>../../../../../../.designer/icon/play.png</iconset>
+                  <normaloff>../icon/play.png</normaloff>../icon/play.png</iconset>
                 </property>
                </widget>
               </item>
@@ -194,15 +200,22 @@
               <layout class="QVBoxLayout" name="verticalLayout_7">
                <item>
                 <layout class="QGridLayout" name="gridLayout">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_5">
+                 <item row="0" column="1">
+                  <widget class="QComboBox" name="comboBox"/>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QLabel" name="label_7">
                    <property name="text">
-                    <string>画笔颜色</string>
+                    <string>TextLabel</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QComboBox" name="comboBox"/>
+                 <item row="0" column="2">
+                  <widget class="QLabel" name="label_8">
+                   <property name="text">
+                    <string>TextLabel</string>
+                   </property>
+                  </widget>
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_6">
@@ -211,8 +224,19 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_5">
+                   <property name="text">
+                    <string>画笔颜色</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="1" column="1">
-                  <widget class="QComboBox" name="comboBox_2"/>
+                  <widget class="QSlider" name="horizontalSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
@@ -262,9 +286,9 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
-                <widget class="QPushButton" name="pushButton_2">
+                <widget class="QCheckBox" name="checkBox">
                  <property name="text">
-                  <string>重置</string>
+                  <string>抵消亮度影响</string>
                  </property>
                 </widget>
                </item>
@@ -311,8 +335,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1046</width>
-     <height>26</height>
+     <width>1027</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -321,20 +345,34 @@
     </property>
     <addaction name="openAct"/>
     <addaction name="separator"/>
-    <addaction name="settingAct"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
      <string>帮助</string>
     </property>
-    <addaction name="aboutAct"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_3"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
-   <property name="autoFillBackground">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="font">
+    <font>
+     <weight>50</weight>
+     <italic>false</italic>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
+   <property name="acceptDrops">
     <bool>false</bool>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
    </property>
    <property name="sizeGripEnabled">
     <bool>true</bool>
@@ -352,7 +390,7 @@
    </attribute>
    <addaction name="openAct"/>
    <addaction name="separator"/>
-   <addaction name="settingAct"/>
+   <addaction name="aboutAct"/>
   </widget>
   <action name="openAct">
    <property name="icon">

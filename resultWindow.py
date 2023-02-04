@@ -14,7 +14,7 @@ class ResultWindow(QWidget):
         self.ROI_COORD_LT = None
         self.ROI_COORD_RB = None
         self.VIDEO_PATH = None
-        self.SCALE_RATE = 0.3
+        self.SCALE_RATE = None
         self.X_POINTS = []
         self.Y_POINTS = []
 
@@ -22,6 +22,7 @@ class ResultWindow(QWidget):
         self.analysis()
         self.set_label()
         self.set_table(self.Y_POINTS)
+        self.ui.show()
 
     def analysis(self):
         if self.ROI_COORD_LT is not None and self.ROI_COORD_RB is not None and self.VIDEO_PATH is not None:
