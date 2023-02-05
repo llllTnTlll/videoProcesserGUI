@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>970</width>
-    <height>513</height>
+    <width>774</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>绘图</string>
+        <string>结果</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
@@ -45,22 +45,36 @@
          <widget class="QTableWidget" name="resultTable"/>
         </item>
         <item>
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>复制数据至剪切板</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QGroupBox" name="groupBox_3">
           <property name="title">
-           <string>GroupBox</string>
+           <string>图表</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QCheckBox" name="checkBox">
              <property name="text">
-              <string>PushButton</string>
+              <string>抵消平均亮度影响</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_2">
+            <widget class="QPushButton" name="pushButton_3">
              <property name="text">
-              <string>PushButton</string>
+              <string>重新绘制图表</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton">
+             <property name="text">
+              <string>保存图表至本地</string>
              </property>
             </widget>
            </item>

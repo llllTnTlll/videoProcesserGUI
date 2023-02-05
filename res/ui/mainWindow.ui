@@ -178,7 +178,7 @@
                 </layout>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton">
+                <widget class="QPushButton" name="selectRoiBtn">
                  <property name="text">
                   <string>从当前帧选择ROI</string>
                  </property>
@@ -285,13 +285,6 @@
                <string>功能</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
-               <item>
-                <widget class="QCheckBox" name="checkBox">
-                 <property name="text">
-                  <string>抵消亮度影响</string>
-                 </property>
-                </widget>
-               </item>
                <item>
                 <widget class="QPushButton" name="analysisBtn">
                  <property name="text">

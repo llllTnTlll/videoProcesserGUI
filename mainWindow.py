@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
 import funcs
 from funcs import get_avg_gray_value
 from resultWindow import ResultWindow
+from roiWindow import RoiWindow
 
 
 class VideoStatus:
@@ -38,6 +39,8 @@ class VideoInfo:
         self.ROI_THICKNESS = 2
         self.SCALE_RATE = 1
         self.CURTAIN_SIZE = (600, 400)
+        self.VIDEO_FRAME = None
+        self.VIDEO_FRAME_PROCESSED = None
 
 
 class VideoPlayer(QThread):
@@ -127,6 +130,7 @@ class MainWindow(QWidget):
 
         # 子窗体
         self.result_window = ResultWindow()
+        self.roi_window = RoiWindow()
 
         # 加载ui
         self.ui = uic.loadUi("./res/ui/MainWindow.ui")
@@ -135,6 +139,7 @@ class MainWindow(QWidget):
         # 按键功能
         self.ui.playBtn.clicked.connect(self.play_or_pause)
         self.ui.analysisBtn.clicked.connect(self.start_analysis)
+        self.ui.selectRoiBtn.clicked.connect(self.select_roi)
 
         # 动作
         self.ui.openAct.triggered.connect(self.open_act)
@@ -166,8 +171,10 @@ class MainWindow(QWidget):
     def behaviors_lock(self, status):
         if status:
             self.ui.behaviors_groupBox.setEnabled(False)
+            self.ui.parameters_groupBox.setEnabled(False)
         elif not status:
             self.ui.behaviors_groupBox.setEnabled(True)
+            self.ui.parameters_groupBox.setEnabled(True)
 
     def open_act(self):
         cap = "open video file"
@@ -184,16 +191,10 @@ class MainWindow(QWidget):
             # TODO: 退出时重置分析状态
         self.t.start()
 
-    # def start_analysis(self):
-    #     # bar = QProgressBar()
-    #     # bar.setRange(0, 0)
-    #     # self.ui.statusbar.addWidget(bar)
-    #
-    #     self.resultWindow.ROI_COORD_LT = self.ROI_COORD_LT
-    #     self.resultWindow.ROI_COORD_RB = self.ROI_COORD_RB
-    #     self.resultWindow.VIDEO_PATH = self.VIDEO_PATH
-    #     self.resultWindow.SCALE_RATE = 1
-    #     self.resultWindow.init_result()
+    def select_roi(self):
+        pixmap = self.video_info.VIDEO_FRAME
+        self.roi_window.set_roilabel(pixmap)
+        self.roi_window.ui.show()
 
     # 视频相关
     def play_or_pause(self):
@@ -249,7 +250,7 @@ class MainWindow(QWidget):
     def slider_moved(self, position):
         self.player.slider_pressed()
         if self.player.player_status != VideoStatus.VIDEO_NOT_LOADED:
-            target_frame = int((position / 100) * self.VIDEO_FRAME_COUNT)
+            target_frame = int((position / 100) * self.video_info.VIDEO_FRAME_COUNT)
             self.video_capture.set(cv.CAP_PROP_POS_FRAMES, target_frame)
             self.set_progress(target_frame)
 
@@ -258,22 +259,31 @@ class MainWindow(QWidget):
 
     def set_curtain(self):
         """初始化幕布"""
-        img = np.zeros((self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1], 3), np.uint8)
+        curtain = np.zeros((self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1], 3), np.uint8)
         self.ui.VideoLabel.resize(self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1])
-        self.set_pixmap(img, self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1])
+        curtain = self.to_pixmap(curtain, self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1])
+        self.ui.VideoLabel.setPixmap(curtain)
 
-    def set_pixmap(self, img, width, height):
-        """帧格式转化与label刷新"""
+    # def set_pixmap(self, img, width, height):
+    #     """帧格式转化与label刷新"""
+    #     temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
+    #     temp_pixmap = QPixmap.fromImage(temp_image)
+    #     temp_pixmap.scaled(self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1])
+    #     self.ui.VideoLabel.setPixmap(temp_pixmap)
+
+    def to_pixmap(self, img, width, height):
+        """帧格式转化"""
         temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
         temp_pixmap = QPixmap.fromImage(temp_image)
         temp_pixmap.scaled(self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1])
-        self.ui.VideoLabel.setPixmap(temp_pixmap)
+        return temp_pixmap
+        # self.ui.VideoLabel.setPixmap(temp_pixmap)
 
     def process(self, rgb):
         if self.ui.ingray_checkBox.isChecked():
             gray = cv.cvtColor(rgb, cv.COLOR_RGB2GRAY)
             rgb = cv.cvtColor(gray, cv.COLOR_GRAY2RGB)
-        processed = cv.rectangle(rgb, self.video_info.ROI_COORD_LT, self.video_info.ROI_COORD_RB, self.video_info.ROI_COLOR, self.video_info.ROI_THICKNESS)
+        processed = cv.rectangle(np.copy(rgb), self.video_info.ROI_COORD_LT, self.video_info.ROI_COORD_RB, self.video_info.ROI_COLOR, self.video_info.ROI_THICKNESS)
         return processed
 
     # 信号响应
@@ -286,10 +296,15 @@ class MainWindow(QWidget):
                 height, width = frame.shape[:2]
                 if frame.ndim == 3:
                     rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-                    self.set_pixmap(self.process(rgb), width, height)
+                    processed = self.to_pixmap(self.process(rgb), width, height)
                 elif frame.ndim == 2:
                     rgb = cv.cvtColor(frame, cv.COLOR_GRAY2BGR)
-                    self.set_pixmap(self.process(rgb), width, height)
+                    processed = self.to_pixmap(self.process(rgb), width, height)
+
+                self.video_info.VIDEO_FRAME = self.to_pixmap(rgb, width, height)
+                self.video_info.VIDEO_FRAME_PROCESSED = processed
+                self.ui.VideoLabel.setPixmap(self.video_info.VIDEO_FRAME_PROCESSED)
+
                 self.video_info.VIDEO_FRAME_NOW += 1
                 self.display_progress()
 
@@ -305,7 +320,7 @@ class MainWindow(QWidget):
             print("open file or capturing device error, init again")
 
     def show_result(self, x_points, y_points):
-        chart = funcs.draw_chart(x_points, y_points, "GRAY VALUE")
+        chart = funcs.draw_chart(x_points, y_points, "GRAY VALUE", "Frame number", "Gray value")
         self.result_window.refresh_result(x_points, y_points, chart)
         self.result_window.ui.show()
 
