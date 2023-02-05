@@ -1,24 +1,20 @@
-from PyQt5 import uic
-from PyQt5.QtWidgets import QWidget, QRubberBand, QGroupBox, QLabel
+import sys
 from PyQt5.QtCore import Qt, QRect, QSize
-from PyQt5.QtGui import QImage, QPixmap, QPainter
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGroupBox, QRubberBand
 
 
-class RoiWindow(QWidget):
+class MainWindow(QMainWindow):
     def __init__(self):
-        super().__init__()
         super().__init__()
         self.setWindowTitle('QRubberBand Example')
         self.groupBox = QGroupBox(self)
         self.groupBox.setGeometry(10, 10, 400, 400)
         self.label = QLabel(self.groupBox)
         self.label.setGeometry(10, 10, 380, 380)
-        self.label.setScaledContents(True)
+        self.label.setPixmap(QPixmap(r'C:\Users\lzy99\OneDrive\图片\屏幕快照\2022-07-18.png'))
         self.rubberBand = QRubberBand(QRubberBand.Rectangle, self.label)
         self.origin = None
-
-    def set_roilabel(self, pixmap):
-        self.label.setPixmap(pixmap)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -38,4 +34,10 @@ class RoiWindow(QWidget):
             print(left_top, right_bottom)
             self.origin = None
             self.rubberBand.hide()
-            self.rubberBand.hide()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    mainWindow = MainWindow()
+    mainWindow.show()
+    sys.exit(app.exec_())

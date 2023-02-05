@@ -194,7 +194,7 @@ class MainWindow(QWidget):
     def select_roi(self):
         pixmap = self.video_info.VIDEO_FRAME
         self.roi_window.set_roilabel(pixmap)
-        self.roi_window.ui.show()
+        self.roi_window.show()
 
     # 视频相关
     def play_or_pause(self):
