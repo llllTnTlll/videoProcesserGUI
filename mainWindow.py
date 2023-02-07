@@ -13,34 +13,7 @@ import funcs
 from funcs import get_avg_gray_value
 from resultWindow import ResultWindow
 from roiWindow import RoiWindow
-
-
-class VideoStatus:
-    # -1为未加载 1为播放 0为暂停
-    VIDEO_NOT_LOADED = -1
-    VIDEO_PAUSE = 0
-    VIDEO_PLAY = 1
-
-
-class Signals(QObject):
-    refresh_signal = pyqtSignal()
-    analysis_finished_signal = pyqtSignal(list, list)
-
-
-class VideoInfo:
-    def __init__(self):
-        self.VIDEO_PATH = None
-        self.VIDEO_FPS = 0
-        self.VIDEO_FRAME_COUNT = 0
-        self.VIDEO_FRAME_NOW = 0
-        self.ROI_COORD_LT = (400, 500)
-        self.ROI_COORD_RB = (850, 1000)
-        self.ROI_COLOR = (255, 0, 0)
-        self.ROI_THICKNESS = 2
-        self.SCALE_RATE = 1
-        self.CURTAIN_SIZE = (600, 400)
-        self.VIDEO_FRAME = None
-        self.VIDEO_FRAME_PROCESSED = None
+from ops import VideoInfo, VideoStatus, Signals
 
 
 class VideoPlayer(QThread):
@@ -166,6 +139,7 @@ class MainWindow(QWidget):
         # 信号
         self.player.signals.refresh_signal.connect(self.frame_refresh)
         self.t.signals.analysis_finished_signal.connect(self.show_result)
+        self.roi_window.signals.roi_selected_signal.connect(self.roi_selected)
 
     # 基本功能与按键响应
     def behaviors_lock(self, status):
@@ -186,15 +160,13 @@ class MainWindow(QWidget):
             self.behaviors_lock(False)
 
     def start_analysis(self):
-        if self.t.isRunning():
-            self.t.quit()
-            # TODO: 退出时重置分析状态
+        self.ui.behaviors_groupBox.setEnabled(False)
         self.t.start()
 
     def select_roi(self):
         pixmap = self.video_info.VIDEO_FRAME
         self.roi_window.set_roilabel(pixmap)
-        self.roi_window.show()
+        self.roi_window.ui.show()
 
     # 视频相关
     def play_or_pause(self):
@@ -264,13 +236,6 @@ class MainWindow(QWidget):
         curtain = self.to_pixmap(curtain, self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1])
         self.ui.VideoLabel.setPixmap(curtain)
 
-    # def set_pixmap(self, img, width, height):
-    #     """帧格式转化与label刷新"""
-    #     temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
-    #     temp_pixmap = QPixmap.fromImage(temp_image)
-    #     temp_pixmap.scaled(self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1])
-    #     self.ui.VideoLabel.setPixmap(temp_pixmap)
-
     def to_pixmap(self, img, width, height):
         """帧格式转化"""
         temp_image = QImage(img.flatten(), width, height, QImage.Format_RGB888)
@@ -321,8 +286,14 @@ class MainWindow(QWidget):
 
     def show_result(self, x_points, y_points):
         chart = funcs.draw_chart(x_points, y_points, "GRAY VALUE", "Frame number", "Gray value")
-        self.result_window.refresh_result(x_points, y_points, chart)
         self.result_window.ui.show()
+        self.result_window.refresh_result(x_points, y_points, chart)
+        self.ui.behaviors_groupBox.setEnabled(True)
+
+    def roi_selected(self, selected):
+        self.video_info.ROI_COORD_LT = [selected[0], selected[1]]
+        self.video_info.ROI_COORD_RB = [selected[2], selected[3]]
+        self.reset_coord()
 
     # 兴趣区域相关
     def reset_coord(self):
