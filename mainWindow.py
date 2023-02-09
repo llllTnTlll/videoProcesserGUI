@@ -6,11 +6,10 @@ import cv2 as cv
 import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QColor
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
 
-import funcs
-from funcs import get_avg_gray_value
+from funcs import get_avg_gray_value, raise_up_window, draw_chart
 from resultWindow import ResultWindow
 from roiWindow import RoiWindow
 from ops import VideoInfo, VideoStatus, Signals
@@ -57,40 +56,42 @@ class AnalysisThread(QThread):
         super().__init__()
         self.video_info = info
         self.signals = Signals()
+        # self.is_offset = is_offset
 
     def run(self):
-        if self.video_info.ROI_COORD_LT is not None \
-                and self.video_info.ROI_COORD_RB is not None \
-                and self.video_info.VIDEO_PATH is not None:
-            # 待绘制点集
-            x_points = []
-            y_points = []
+        if not all(
+                (
+                        self.video_info.ROI_COORD_LT,
+                        self.video_info.ROI_COORD_RB,
+                        self.video_info.VIDEO_PATH,
+                )
+        ):
+            return
 
-            capture = cv.VideoCapture(self.video_info.VIDEO_PATH)
-            frame_count = 0
-            while capture.isOpened():
-                ret, frame = capture.read()
-                if ret:
-                    # 读取坐标
-                    x_min = int(self.video_info.ROI_COORD_LT[0] * (1 / self.video_info.SCALE_RATE))
-                    x_max = int(self.video_info.ROI_COORD_RB[0] * (1 / self.video_info.SCALE_RATE))
-                    y_min = int(self.video_info.ROI_COORD_LT[1] * (1 / self.video_info.SCALE_RATE))
-                    y_max = int(self.video_info.ROI_COORD_RB[1] * (1 / self.video_info.SCALE_RATE))
+        x_points = []
+        y_points = []
 
-                    # 截取图像
-                    roi = frame[y_min:y_max, x_min:x_max, :]
-
-                    # 计算灰度平均值
-                    gray_means = get_avg_gray_value(roi)
-                    y_points.append(gray_means)
-                    x_points.append(frame_count)
-
-                else:
-                    break
-                frame_count += 1
-            capture.release()
-
-            self.signals.analysis_finished_signal.emit(x_points, y_points)
+        capture = cv.VideoCapture(self.video_info.VIDEO_PATH)
+        frame_count = 0
+        while capture.isOpened():
+            ret, frame = capture.read()
+            if not ret:
+                break
+            x_min = int(self.video_info.ROI_COORD_LT[0] * (1 / self.video_info.SCALE_RATE))
+            x_max = int(self.video_info.ROI_COORD_RB[0] * (1 / self.video_info.SCALE_RATE))
+            y_min = int(self.video_info.ROI_COORD_LT[1] * (1 / self.video_info.SCALE_RATE))
+            y_max = int(self.video_info.ROI_COORD_RB[1] * (1 / self.video_info.SCALE_RATE))
+            roi = frame[y_min:y_max, x_min:x_max, :]
+            gray_means = get_avg_gray_value(roi)
+            # if self.is_offset:
+            #     gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+            #     average = np.mean(gray)
+            #     gray_means = gray_means - average
+            y_points.append(gray_means)
+            x_points.append(frame_count)
+            frame_count += 1
+        capture.release()
+        self.signals.analysis_finished_signal.emit(x_points, y_points)
 
 
 class MainWindow(QWidget):
@@ -108,6 +109,19 @@ class MainWindow(QWidget):
         # 加载ui
         self.ui = uic.loadUi("./res/ui/MainWindow.ui")
         self.reset_coord()
+
+        self.ui.BrushWidthSlider.valueChanged.connect(self.brush_width_changed)
+        self.ui.BrushWidthSlider.setRange(1, 10)
+        self.ui.BrushWidthSlider.setValue(5)
+        self.ui.rply_checkbox.setChecked(True)
+
+        self.colors = [("Red", (255, 0, 0)), ("Green", (0, 255, 0)), ("Blue", (0, 0, 255)), ("Yellow", (255, 255, 0)), ("Purple", (255, 0, 255))]
+        for color_name, color_value in self.colors:
+            self.ui.comboBox_Color.addItem(color_name)
+            self.ui.comboBox_Color.setItemData(self.ui.comboBox_Color.count() - 1, QColor(*color_value), Qt.BackgroundRole)
+        self.ui.comboBox_Color.activated[int].connect(self.brush_color_changed)
+        self.ui.comboBox_Color.setCurrentIndex(0)
+        self.ui.label_brush_color.setText("(255, 0, 0)")
 
         # 按键功能
         self.ui.playBtn.clicked.connect(self.play_or_pause)
@@ -161,12 +175,23 @@ class MainWindow(QWidget):
 
     def start_analysis(self):
         self.ui.behaviors_groupBox.setEnabled(False)
+        if self.ui.checkBox_offset.isChecked():
+            self.t = AnalysisThread(self.video_info)
         self.t.start()
 
     def select_roi(self):
         pixmap = self.video_info.VIDEO_FRAME
         self.roi_window.set_roilabel(pixmap)
         self.roi_window.ui.show()
+
+    def brush_color_changed(self, index):
+        color = self.colors[index][1]
+        self.ui.label_brush_color.setText(f"({color[0]}, {color[1]}, {color[2]})")
+        self.video_info.ROI_COLOR = color
+
+    def brush_width_changed(self):
+        self.ui.label_brush_width.setText(str(self.ui.BrushWidthSlider.value()))
+        self.video_info.ROI_THICKNESS = int(self.ui.BrushWidthSlider.value())
 
     # 视频相关
     def play_or_pause(self):
@@ -242,7 +267,6 @@ class MainWindow(QWidget):
         temp_pixmap = QPixmap.fromImage(temp_image)
         temp_pixmap.scaled(self.video_info.CURTAIN_SIZE[0], self.video_info.CURTAIN_SIZE[1])
         return temp_pixmap
-        # self.ui.VideoLabel.setPixmap(temp_pixmap)
 
     def process(self, rgb):
         if self.ui.ingray_checkBox.isChecked():
@@ -285,10 +309,11 @@ class MainWindow(QWidget):
             print("open file or capturing device error, init again")
 
     def show_result(self, x_points, y_points):
-        chart = funcs.draw_chart(x_points, y_points, "GRAY VALUE", "Frame number", "Gray value")
-        self.result_window.ui.show()
+        chart = draw_chart(x_points, y_points, "Frame number", "Difference in gray scale")
         self.result_window.refresh_result(x_points, y_points, chart)
         self.ui.behaviors_groupBox.setEnabled(True)
+        self.result_window.ui.show()
+        raise_up_window(self.result_window.ui)
 
     def roi_selected(self, selected):
         self.video_info.ROI_COORD_LT = [selected[0], selected[1]]

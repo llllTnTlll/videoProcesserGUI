@@ -33,16 +33,19 @@ class RoiWindow(QtWidgets.QWidget):
             return True
         return super().eventFilter(source, event)
 
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.origin = event.pos()
             self.rubberBand.setGeometry(QRect(self.origin, QSize()))
             self.rubberBand.show()
 
+
     def mouseMoveEvent(self, event):
         if not self.origin:
             return
         self.rubberBand.setGeometry(QRect(self.origin, event.pos()).normalized())
+
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:

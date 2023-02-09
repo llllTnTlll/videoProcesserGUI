@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QHeaderView, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QHeaderView, QTableWidgetItem, QFileDialog
 from PyQt5 import uic
+import pyperclip
 
 
 class ResultWindow(QWidget):
@@ -10,6 +11,9 @@ class ResultWindow(QWidget):
         self.CHART = None
         self.X_POINTS = None
         self.Y_POINTS = None
+
+        self.ui.pushButton_copy.clicked.connect(self.copy_result)
+        self.ui.pushButto_save.clicked.connect(self.save_chart)
 
     def refresh_result(self, x_points, y_points, chart):
         self.CHART = chart
@@ -30,4 +34,14 @@ class ResultWindow(QWidget):
     def set_label(self):
         self.ui.resultLabel.setPixmap(self.CHART.toqpixmap())
 
+    def copy_result(self):
+        pyperclip.copy(str(self.Y_POINTS))
 
+    def save_chart(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
+                                                   "Images (*.png *.xpm *.jpg *.bmp *.gif);;All Files (*)",
+                                                   options=options)
+        if file_name:
+            self.CHART.save(file_name)
