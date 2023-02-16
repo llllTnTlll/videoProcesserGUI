@@ -1,11 +1,10 @@
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QRect, QSize, QEvent
-from PyQt5.QtWidgets import QRubberBand
-from pyqt5_plugins.examplebutton import QtWidgets
+from PyQt5.QtWidgets import QRubberBand, QWidget
 from ops import Signals
 
 
-class RoiWindow(QtWidgets.QWidget):
+class RoiWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.ui = uic.loadUi("./res/ui/roiWindow.ui")

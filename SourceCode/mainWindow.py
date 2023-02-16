@@ -10,9 +10,9 @@ from PyQt5.QtGui import QImage, QPixmap, QColor
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
 
 from funcs import get_avg_gray_value, raise_up_window, draw_chart
+from ops import VideoInfo, VideoStatus, Signals
 from resultWindow import ResultWindow
 from roiWindow import RoiWindow
-from ops import VideoInfo, VideoStatus, Signals
 
 
 class VideoPlayer(QThread):
