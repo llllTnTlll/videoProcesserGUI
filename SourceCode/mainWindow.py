@@ -5,7 +5,7 @@ from pathlib import Path
 import cv2 as cv
 import numpy as np
 from PyQt5 import uic
-from PyQt5.QtCore import *
+from PyQt5.QtCore import Qt, QThread, QMutex, QMutexLocker, QCoreApplication
 from PyQt5.QtGui import QImage, QPixmap, QColor
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
 
