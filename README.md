@@ -6,10 +6,25 @@
 + 如果您在此前具有一定的编程基础，且想要更加直观的了解程序的运行逻辑，请移步[llllTnTlll/videoProcessing](https://github.com/llllTnTlll/videoProcessing)
 
 ### 使用方法
-使用程序的打包版本即可直接在windows环境下使用本应用，您可以在[这里](https://github.com/llllTnTlll/videoProcesserGUI/releases/tag/v1.0.0-alpha)获取到本程序的压缩文件，解压videoProcesserGUI.zip
-后运行mainWindow.exe即可开始工作
+使用程序的打包版本即可直接在windows环境下使用本应用，您可以[点击这里](https://github.com/llllTnTlll/videoProcesserGUI/releases/tag/v1.0.0-alpha)获取到本程序的压缩文件，解压videoProcesserGUI.zip
+后运行mainWindow.exe即可开始工作。
+
+在点击分析按钮之前，请确保您已经正确选择兴趣区域(ROI),应用程序仅会针对兴趣区域内的内容分析灰度值变化,您可以通过在文本框直接输入整数值来划定兴趣区域，也可以通过点击“从当前帧选择ROI”按钮来选择兴趣区域。   
+选择完成后，点击分析按钮得到分析结果。
 
 ### 基本运行逻辑
 为了方便使用，本程序通过一个视频线程以一定频率刷新QLabel实现播放器功能，你可以从下图中了解QLabel刷新的基本流程：
-![流程图](https://github.com/llllTnTlll/picGit/blob/master/VideoProcesserGUI/refresh-Page-1.drawio.png)
+  
 
+![流程图](https://github.com/llllTnTlll/picGit/blob/master/VideoProcesserGUI/refresh-Page-1.drawio.png)
+  
+  
+在灰度平均值计算方面则使用了OpenCV库自带的cv.meanStdDev()方法：
+```python
+def get_avg_gray_value(roi):
+    gray = cv.cvtColor(roi, cv.COLOR_BGR2GRAY)
+    means, dev = cv.meanStdDev(gray)
+    return means[0, 0]  
+```
+其中roi代表截取的roi图像，您可以在func.py文件中找到该api，通过修改该api即可修改程序的绘图逻辑，从而改变程序的功能，请注意返回值必须为一个值，以保证折线图可以被正确绘制。
+请注意cv.meanStdDev()并不是简单的计算灰度值的平均值，而是对RGB三通道设定了一个加权系数，你可以在opencv的[官方文档](https://docs.opencv.org/3.4.1/de/d25/imgproc_color_conversions.html)中找到相关说明

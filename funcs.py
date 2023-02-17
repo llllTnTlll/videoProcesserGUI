@@ -6,8 +6,8 @@ import io
 from PyQt5.QtWidgets import QDesktopWidget
 
 
-def get_avg_gray_value(img):
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+def get_avg_gray_value(roi):
+    gray = cv.cvtColor(roi, cv.COLOR_BGR2GRAY)
     means, dev = cv.meanStdDev(gray)
     return means[0, 0]
 
