@@ -9,7 +9,7 @@
 
 ## 开始之前
 我为该程序准备了两个不同的版本：在编译器中运行的简易无GUI版本以及带UI的可执行文件版本，两者均具有相同的基本逻辑。
-+ 如果您在此前并不具备编程基础，并且不想进行复杂的配置，那么我推荐您使用本仓库里 **Realsed** 文件下的已编译文件，并运行 **mainWindow.exe**
++ 如果您在此前并不具备编程基础，并且不想进行复杂的配置，那么我推荐您使用本仓库，你可以下载源代码运行或是直接下载[已打包的可执行文件](https://github.com/llllTnTlll/videoProcesserGUI/releases/tag/v1.0.0-alpha)，并运行 **mainWindow.exe**
 + 如果您在此前具有一定的编程基础，且想要更加直观的了解程序的运行逻辑，请移步[llllTnTlll/videoProcessing](https://github.com/llllTnTlll/videoProcessing)
 
 ## 使用方法
